@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Questionnaire progressif</title>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+    }
+    #quizForm {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+	 label {
+      display: flex;
+      align-items: center;
+      font-size: 1.5em;
+      margin: 15px 0;
+    }
+      label input[type="radio"] {
+      flex-shrink: 0;
+      margin-right: 12px;
+    }
+    .question {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .question.active {
+      display: flex;
+    }
+    label {
+      display: block;
+      margin: 20px 0;
+      font-size: 1.5em;
+    }
+    input[type="radio"] {
+      width: 25px;
+      height: 25px;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    #buttonContainer {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+  <form id="quizForm">
+    <div id="questionsContainer"></div>
+    <div id="buttonContainer">
+      <button type="button" id="prevBtn" disabled>Précédent</button>
+      <button type="button" id="nextBtn">Suivant</button>
+      <button type="submit" id="submitBtn" style="display:none">Terminer</button>
+    </div>
+  </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const questions = [
+  { number: "Question 1", prompt: "Dans une querelle, la personne sage se tait." },
+  { number: "Question 2", prompt: "Le plus fort a toujours raison." },
+  { number: "Question 3", prompt: "Les mots doux arrangent les choses." },
+  { number: "Question 4", prompt: "Les bons comptes font les bons amis." },
+  { number: "Question 5", prompt: "Du choc des idées vient la lumière." },
+  { number: "Question 6", prompt: "Reste loin des gens qui sont en désaccord avec toi." },
+  { number: "Question 7", prompt: "Le conquérent c'est celui qui fait fuir ses ennemis." },
+  { number: "Question 8", prompt: "Désarme ton ennemi avec ta douceur et ta bonté." },
+  { number: "Question 9", prompt: "Faire un compromis évite les querelles." },
+  { number: "Question 10", prompt: "Personne n'a la réponse finale, chacun a une pièce qui y contribue." },
+  { number: "Question 11", prompt: "Evite les querelleurs car ils te rendent la vie misérable." },
+  { number: "Question 12", prompt: "L'important c'est d'avoir raison." },
+  { number: "Question 13", prompt: "Les mots tendrent assurent l'harmonie." },
+  { number: "Question 14", prompt: "Oeil pour oeil, dent pour dent." },
+  { number: "Question 15", prompt: "Si je peux mettre de coté mes idées, je peux écouter celles des autres" }
+];
+      const choices = ['1: Jamais ', '2: Rarement', '3: Quelquefois', '4: Fréquemment', '5: Très souvent'];
+      let currentIndex = 0;
+      const responses = {};
+
+      const container = document.getElementById('questionsContainer');
+
+      questions.forEach((q, index) => {
+        const div = document.createElement('div');
+        div.classList.add('question');
+        div.id = `question${index}`;
+        div.innerHTML = `
+          <div class="number" style="font-size:2em; margin-bottom:10px;">${q.number}</div>
+          <div class="prompt" style="font-size:1.5em; margin-bottom:20px;">${q.prompt}</div>
+          ${choices.map(choice => `
+            <label><input type="radio" name="q${index}" value="${choice}" required> ${choice}</label>
+          `).join('')}
+        `;
+        container.appendChild(div);
+      });
+
+      function showQuestion(index) {
+        document.querySelectorAll('.question').forEach(q => q.classList.remove('active'));
+        const question = document.getElementById(`question${index}`);
+        if (question) question.classList.add('active');
+      }
+
+      showQuestion(currentIndex);
+
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const submitBtn = document.getElementById('submitBtn');
+
+      prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) {
+          currentIndex--;
+          showQuestion(currentIndex);
+          updateButtons();
+        }
+      });
+
+      nextBtn.addEventListener('click', () => {
+        const currentInputs = document.getElementsByName(`q${currentIndex}`);
+        const selected = [...currentInputs].find(input => input.checked);
+        if (selected) {
+          responses[`q${currentIndex}`] = selected.value;
+          currentIndex++;
+          showQuestion(currentIndex);
+          updateButtons();
+        } else {
+          alert('Veuillez sélectionner une réponse.');
+        }
+      });
+
+      function updateButtons() {
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.style.display = currentIndex < questions.length - 1 ? 'inline' : 'none';
+        submitBtn.style.display = currentIndex === questions.length - 1 ? 'inline' : 'none';
+      }
+
+      document.getElementById('quizForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const lastInputs = document.getElementsByName(`q${currentIndex}`);
+        const selected = [...lastInputs].find(input => input.checked);
+        if (selected) {
+          responses[`q${currentIndex}`] = selected.value;
+        }
+        console.log('Réponses enregistrées :', responses);
+		sessionStorage.setItem('responses', JSON.stringify(responses));
+        window.location.href = "resultats.html";
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Résultats</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      display: flex;
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    #resultContainer {
+      width: 35%;
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    th:nth-child(1), td:nth-child(1) {
+      width: 40%;
+    }
+    th:nth-child(2), td:nth-child(2) {
+      width: 60%;
+    }
+    #rightSide {
+      width: 65%;
+      border-left: 2px dashed #ccc;
+      padding-left: 40px;
+    }
+    #summaryTable {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    #summaryTable th, #summaryTable td {
+      border: 1px solid #999;
+      padding: 12px;
+      vertical-align: top;
+    }
+    .labelCell {
+     font-weight: bold;
+     width: 18%;
+    text-align: center;
+     vertical-align: middle;
+   }
+    .inputCell {
+      width: 20%;
+    }
+    .inputCell input {
+      width: 95%;
+      margin-bottom: 8px;
+    }
+    #chartContainer {
+      margin-top: 40px;
+    }
+    canvas {
+      max-width: 100%;
+    }
+	@media screen and (max-width: 768px) {
+  body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #resultContainer,
+  #rightSide {
+    width: 100%;
+    margin: 0 0 20px 0;
+    padding: 0;
+  }
+
+  #rightSide {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  table,
+  #summaryTable {
+    font-size: 14px;
+  }
+
+  .inputCell input {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  canvas {
+    max-width: 100%;
+    height: auto !important;
+  }
+  }
+  </style>
+</head>
+<body>
+  <div id="resultContainer">
+    <h2>Résultats du questionnaire</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Question</th>
+          <th>Réponse</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+  </div>
+
+  <div id="rightSide">
+    <h2>Résumé par thème</h2>
+    <table id="summaryTable">
+      <tr>
+        <td class="labelCell">La tortue</td>
+        <td class="inputCell">
+          Question 1 : <input type="text" id="tortue1"><br>
+          Question 2 : <input type="text" id="tortue2"><br>
+          Question 3 : <input type="text" id="tortue3"><br>
+          Total des 3 questions : <input type="text" id="tortueTotal">
+        </td>
+      </tr>
+      <tr>
+        <td class="labelCell">Le requin</td>
+        <td class="inputCell">
+          Question 1 : <input type="text" id="requin1"><br>
+          Question 2 : <input type="text" id="requin2"><br>
+          Question 3 : <input type="text" id="requin3"><br>
+          Total des 3 questions : <input type="text" id="requinTotal">
+        </td>
+      </tr>
+      <tr>
+        <td class="labelCell">L'ourson</td>
+        <td class="inputCell">
+          Question 1 : <input type="text" id="ourson1"><br>
+          Question 2 : <input type="text" id="ourson2"><br>
+          Question 3 : <input type="text" id="ourson3"><br>
+          Total des 3 questions : <input type="text" id="oursonTotal">
+        </td>
+      </tr>
+      <tr>
+        <td class="labelCell">Le renard</td>
+        <td class="inputCell">
+          Question 1 : <input type="text" id="renard1"><br>
+          Question 2 : <input type="text" id="renard2"><br>
+          Question 3 : <input type="text" id="renard3"><br>
+          Total des 3 questions : <input type="text" id="renardTotal">
+        </td>
+      </tr>
+      <tr>
+        <td class="labelCell">Le hibou</td>
+        <td class="inputCell">
+          Question 1 : <input type="text" id="hibou1"><br>
+          Question 2 : <input type="text" id="hibou2"><br>
+          Question 3 : <input type="text" id="hibou3"><br>
+          Total des 3 questions : <input type="text" id="hibouTotal">
+        </td>
+      </tr>
+    </table>
+    <div id="chartContainer">
+      <canvas id="animalChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const responses = JSON.parse(sessionStorage.getItem('responses') || '{}');
+    const tbody = document.getElementById('resultsBody');
+
+    for (let i = 0; i < 15; i++) {
+      const question = `Question ${i + 1}`;
+      const answer = responses[`q${i}`] || '';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${question}</td><td>${answer}</td>`;
+      tbody.appendChild(tr);
+    }
+
+    function getTotal(id1, id2, id3) {
+      const val1 = parseFloat(document.getElementById(id1).value) || 0;
+      const val2 = parseFloat(document.getElementById(id2).value) || 0;
+      const val3 = parseFloat(document.getElementById(id3).value) || 0;
+      return val1 + val2 + val3;
+    }
+
+    function drawChart() {
+      const animals = [
+        { label: 'Tortue', total: getTotal('tortue1', 'tortue2', 'tortue3'), color: '#6ba292' },
+        { label: 'Requin', total: getTotal('requin1', 'requin2', 'requin3'), color: '#c94c4c' },
+        { label: 'Ourson', total: getTotal('ourson1', 'ourson2', 'ourson3'), color: '#e2a03f' },
+        { label: 'Renard', total: getTotal('renard1', 'renard2', 'renard3'), color: '#d971bc' },
+        { label: 'Hibou', total: getTotal('hibou1', 'hibou2', 'hibou3'), color: '#829bd0' }
+      ];
+
+      const maxTotal = Math.max(...animals.map(a => a.total));
+      const offset = animals.map(a => (a.total === maxTotal ? 20 : 0));
+
+      const data = {
+        labels: animals.map(a => a.label),
+        datasets: [{
+          label: 'Total par animal',
+          data: animals.map(a => a.total),
+          backgroundColor: animals.map(a => a.color),
+          offset: offset
+        }]
+      };
+
+      const config = {
+        type: 'pie',
+        data: data,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'right' }
+          }
+        }
+      };
+
+      const canvas = document.getElementById('animalChart');
+      if (Chart.getChart(canvas)) Chart.getChart(canvas).destroy();
+      new Chart(canvas, config);
+    }
+
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', drawChart);
+    });
+  </script>
+</body>
+</html>
+
