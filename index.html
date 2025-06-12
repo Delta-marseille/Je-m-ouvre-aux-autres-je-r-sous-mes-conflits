@@ -2,64 +2,110 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Questionnaire progressif</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Questionnaire</title>
   <style>
-    body, html {
-      height: 100%;
+    :root {
+      --primary: #2c3e50;
+      --accent: #3498db;
+      --background: #f9f9f9;
+      --font: 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
       margin: 0;
       padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: Arial, sans-serif;
+      font-family: var(--font);
+      background-color: var(--background);
+      color: var(--primary);
     }
+
     #quizForm {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 30px 20px 60px;
+      box-sizing: border-box;
     }
-	 label {
-      display: flex;
-      align-items: center;
-      font-size: 1.5em;
-      margin: 15px 0;
-    }
-      label input[type="radio"] {
-      flex-shrink: 0;
-      margin-right: 12px;
-    }
+
     .question {
       display: none;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 40px;
     }
+
     .question.active {
       display: flex;
     }
+
+    .number {
+      font-size: 1.4em;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .prompt {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
     label {
-      display: block;
-      margin: 20px 0;
-      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: border 0.2s;
+      font-size: 1em;
     }
+
+    label:hover {
+      border-color: var(--accent);
+    }
+
     input[type="radio"] {
-      width: 25px;
-      height: 25px;
-      margin-right: 10px;
-      vertical-align: middle;
+      margin-right: 12px;
+      transform: scale(1.3);
+      accent-color: var(--accent);
     }
+
     #buttonContainer {
       display: flex;
-      justify-content: center;
-      gap: 20px;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 30px;
     }
+
     button {
-      padding: 10px 20px;
+      flex: 1;
+      padding: 12px 15px;
       font-size: 1em;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #2573a6;
+    }
+
+    @media (max-width: 480px) {
+      .prompt { font-size: 1em; }
+      .number { font-size: 1.2em; }
+      button { font-size: 0.9em; }
+      label { font-size: 0.95em; }
     }
   </style>
 </head>
@@ -76,26 +122,25 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const questions = [
-  { number: "Question 1", prompt: "Dans une querelle, la personne sage se tait." },
-  { number: "Question 2", prompt: "Le plus fort a toujours raison." },
-  { number: "Question 3", prompt: "Les mots doux arrangent les choses." },
-  { number: "Question 4", prompt: "Les bons comptes font les bons amis." },
-  { number: "Question 5", prompt: "Du choc des idées vient la lumière." },
-  { number: "Question 6", prompt: "Reste loin des gens qui sont en désaccord avec toi." },
-  { number: "Question 7", prompt: "Le conquérent c'est celui qui fait fuir ses ennemis." },
-  { number: "Question 8", prompt: "Désarme ton ennemi avec ta douceur et ta bonté." },
-  { number: "Question 9", prompt: "Faire un compromis évite les querelles." },
-  { number: "Question 10", prompt: "Personne n'a la réponse finale, chacun a une pièce qui y contribue." },
-  { number: "Question 11", prompt: "Evite les querelleurs car ils te rendent la vie misérable." },
-  { number: "Question 12", prompt: "L'important c'est d'avoir raison." },
-  { number: "Question 13", prompt: "Les mots tendrent assurent l'harmonie." },
-  { number: "Question 14", prompt: "Oeil pour oeil, dent pour dent." },
-  { number: "Question 15", prompt: "Si je peux mettre de coté mes idées, je peux écouter celles des autres" }
-];
+        { number: "Question 1", prompt: "Dans une querelle, la personne sage se tait." },
+        { number: "Question 2", prompt: "Le plus fort a toujours raison." },
+        { number: "Question 3", prompt: "Les mots doux arrangent les choses." },
+        { number: "Question 4", prompt: "Les bons comptes font les bons amis." },
+        { number: "Question 5", prompt: "Du choc des idées vient la lumière." },
+        { number: "Question 6", prompt: "Reste loin des gens qui sont en désaccord avec toi." },
+        { number: "Question 7", prompt: "Le conquérant c'est celui qui fait fuir ses ennemis." },
+        { number: "Question 8", prompt: "Désarme ton ennemi avec ta douceur et ta bonté." },
+        { number: "Question 9", prompt: "Faire un compromis évite les querelles." },
+        { number: "Question 10", prompt: "Personne n'a la réponse finale, chacun a une pièce qui y contribue." },
+        { number: "Question 11", prompt: "Evite les querelleurs car ils te rendent la vie misérable." },
+        { number: "Question 12", prompt: "L'important c'est d'avoir raison." },
+        { number: "Question 13", prompt: "Les mots tendres assurent l'harmonie." },
+        { number: "Question 14", prompt: "Oeil pour oeil, dent pour dent." },
+        { number: "Question 15", prompt: "Si je peux mettre de côté mes idées, je peux écouter celles des autres" }
+      ];
       const choices = ['1: Jamais ', '2: Rarement', '3: Quelquefois', '4: Fréquemment', '5: Très souvent'];
       let currentIndex = 0;
       const responses = {};
-
       const container = document.getElementById('questionsContainer');
 
       questions.forEach((q, index) => {
@@ -103,8 +148,8 @@
         div.classList.add('question');
         div.id = `question${index}`;
         div.innerHTML = `
-          <div class="number" style="font-size:2em; margin-bottom:10px;">${q.number}</div>
-          <div class="prompt" style="font-size:1.5em; margin-bottom:20px;">${q.prompt}</div>
+          <div class="number">${q.number}</div>
+          <div class="prompt">${q.prompt}</div>
           ${choices.map(choice => `
             <label><input type="radio" name="q${index}" value="${choice}" required> ${choice}</label>
           `).join('')}
@@ -141,14 +186,14 @@
           showQuestion(currentIndex);
           updateButtons();
         } else {
-          alert('Veuillez sélectionner une réponse.');
+          navigator.vibrate?.(200);
         }
       });
 
       function updateButtons() {
         prevBtn.disabled = currentIndex === 0;
-        nextBtn.style.display = currentIndex < questions.length - 1 ? 'inline' : 'none';
-        submitBtn.style.display = currentIndex === questions.length - 1 ? 'inline' : 'none';
+        nextBtn.style.display = currentIndex < questions.length - 1 ? 'inline-block' : 'none';
+        submitBtn.style.display = currentIndex === questions.length - 1 ? 'inline-block' : 'none';
       }
 
       document.getElementById('quizForm').addEventListener('submit', function (e) {
@@ -158,8 +203,7 @@
         if (selected) {
           responses[`q${currentIndex}`] = selected.value;
         }
-        console.log('Réponses enregistrées :', responses);
-		sessionStorage.setItem('responses', JSON.stringify(responses));
+        sessionStorage.setItem('responses', JSON.stringify(responses));
         window.location.href = "resultats.html";
       });
     });
